@@ -1,0 +1,147 @@
+/* ========== AwarriCare — Emerald Glow Theme ========== */
+
+:root{
+  --bg1: linear-gradient(180deg,#e6fff7 0%, #e9fff8 50%, #ffffff 100%);
+  --card-bg: #ffffff;
+  --accent: #007f66;
+  --accent-2: #00b38f;
+  --muted: #6b7280;
+  --shadow: 0 8px 20px rgba(6, 78, 59, 0.08);
+  --radius: 14px;
+  --glass: rgba(255,255,255,0.7);
+}
+
+*{box-sizing:border-box}
+body{
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: var(--bg1);
+  color: #0f172a;
+  margin:0;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+}
+
+/* Ensure [hidden] actually hides (so JS can toggle hidden) */
+[hidden]{display:none !important}
+
+/* Header */
+.site-header{
+  background: linear-gradient(90deg, rgba(0,127,102,0.12), rgba(0,179,143,0.06));
+  padding:18px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  box-shadow: var(--shadow);
+  position:sticky;
+  top:0;
+  z-index:40;
+}
+
+.header-inner{
+  max-width:1100px;
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:56px;height:56px;border-radius:12px;object-fit:cover;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+.app-title{font-size:1.25rem;margin:0}
+.tagline{margin:0;font-size:0.9rem;color:var(--muted)}
+
+.controls{display:flex;align-items:center;gap:12px}
+.lang-btn{background:transparent;border:none;font-size:1.2rem;cursor:pointer}
+.language-menu{position:absolute;right:22px;top:64px;background:var(--card-bg);border-radius:10px;padding:8px 6px;box-shadow:var(--shadow);list-style:none}
+.language-menu li{padding:8px 14px;cursor:pointer;border-radius:8px}
+.language-menu li:hover{background:#f3fff9}
+
+.main-nav{display:flex;gap:10px}
+.nav-btn{background:transparent;border:none;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600;color:var(--muted)}
+.nav-btn.active{background:var(--accent);color:white;box-shadow:0 8px 18px rgba(0,127,102,0.12)}
+
+.container{max-width:1100px;margin:26px auto;padding:18px;display:grid;grid-template-columns:1fr 420px;gap:18px}
+@media (max-width:980px){.container{grid-template-columns:1fr;padding:12px}}
+.screen{display:none}
+.screen.active{display:block}
+
+/* Cards */
+.card{background:var(--card-bg);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);margin-bottom:16px}
+.home-grid{display:flex;gap:12px}
+.home-grid .card{flex:1}
+.large{font-size:1.2rem;font-weight:700;color:var(--accent)}
+.lead{color:var(--muted);margin-bottom:12px}
+
+.cycle-input-card input[type="number"], .card input[type="date"], .card input[type="text"], textarea, select, .chat-footer input{
+  width:100%;padding:10px;border-radius:10px;border:1px solid #e6f3ec;background:#fbfffd;font-size:0.95rem;
+}
+
+.row{display:flex;gap:8px;margin-top:10px}
+.btn{padding:10px 14px;border-radius:10px;border:none;background:#f3fbf8;color:var(--accent);cursor:pointer;font-weight:700}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;box-shadow:0 6px 18px rgba(0,127,102,0.12)}
+.btn.muted{background:transparent;border:1px solid #eef8f4;color:var(--accent);font-weight:600}
+
+/* AI box */
+.ai-box{background:#f6fffb;border-radius:10px;padding:12px;margin-top:12px;min-height:60px;color:#044b3b}
+
+/* Forum */
+.forum-card .new-disc-btn{width:100%;text-align:left}
+.new-discussion.hidden{display:none}
+.discussion-thread{padding:10px;border-radius:10px;border:1px solid #eef8f4;margin-bottom:8px}
+
+/* Chat styles */
+.chat-icon{position:fixed;right:20px;bottom:20px;width:60px;height:60px;border-radius:50%;background:linear-gradient(180deg,var(--accent),var(--accent-2));color:white;font-size:22px;border:none;box-shadow:0 12px 30px rgba(0,127,102,0.14);cursor:pointer;z-index:60}
+.chat-box{position:fixed;right:20px;bottom:90px;width:360px;border-radius:12px;background:white;box-shadow:0 18px 40px rgba(0,0,0,0.12);display:flex;flex-direction:column;overflow:hidden;z-index:60}
+.chat-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white}
+.chat-body{padding:12px;max-height:320px;overflow:auto;background:#fbfffd}
+.chat-footer{display:flex;gap:8px;padding:12px;border-top:1px solid #f1f7f4}
+.user-message{align-self:flex-end;background:#e6fff7;padding:8px 10px;border-radius:10px;margin:6px 0;max-width:85%}
+.bot-message{align-self:flex-start;background:#fff;padding:8px 10px;border-radius:10px;margin:6px 0;max-width:85%;border:1px solid #f1f7f4}
+.message-container{margin-bottom:8px}
+.bot-language-label{font-size:11px;color:var(--muted);margin-bottom:6px}
+
+/* Footer */
+.site-footer{text-align:center;padding:18px 8px;color:var(--muted);font-size:0.9rem;margin-top:26px}
+
+/* Responsive */
+@media (max-width:480px){
+  .chat-box{right:12px;left:12px;width:auto;border-radius:12px}
+  .container{padding:12px}
+  .header-inner{flex-direction:column;align-items:flex-start;gap:10px}
+}
+
+/* ===== Background Image Layer Under Entire Page ===== */
+body {
+  position: relative;
+  z-index: 0;
+  /* keep the gradient fallback (we remove it visually because the image will show) */
+  background: var(--bg1);
+}
+
+body::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("/2025 Awarri Challenge/portrait-african-american-woman-posing 1.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -2;
+  opacity: 0.50;
+  
+  filter: saturate(0.95) blur(0px);
+}
+
+body::after{
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0,127,102,0.04); /* subtle emerald tint */
+  z-index: -1;
+}
+
+/* make main cards a tiny bit glassy for better legibility */
+.card, .site-header, .site-footer, .chat-box, .ai-box {
+  background-color: rgba(255,255,255,0.92);
+  backdrop-filter: blur(4px);
+}

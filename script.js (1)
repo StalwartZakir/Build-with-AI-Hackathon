@@ -1,0 +1,341 @@
+/* ========== AwarriCare — Emerald Glow JS (Unified) ========== */
+
+/* ---------- CONFIG: replace with the real key ---------- */
+const HF_API_KEY = "YOUR_HF_API_KEY_HERE";
+const HF_MODEL = "NCAIR1/N-ATLaS-LLM";
+
+/* ---------- Unified AI: demo answers first, N-ATLaS fallback ---------- */
+async function getAIResponse(userText) {
+  if (!userText || !userText.trim()) return "Please type a question.";
+
+  const lower = userText.toLowerCase();
+
+  // Demo Answer 1: cramps before period (exact wording)
+  if (
+    (lower.includes("cramp") || lower.includes("cramps")) &&
+    (lower.includes("before") || lower.includes("period"))
+  ) {
+    return "It's common to feel cramps a day or two before your period. Your uterus prepares to shed its lining, which can cause mild to moderate discomfort. Rest, warm compress, gentle stretching, and hydration can help. But if the pain becomes unusually strong, stops you from daily activities, or comes with fever or heavy bleeding, please see a clinician. Take it gently today.";
+  }
+
+  // Demo Answer 2: Explain ovulation in Yoruba (exact wording)
+  if (lower.includes("ovulation") && lower.includes("yoruba")) {
+    return "Ovulation ni akoko tí ẹyin obinrin ba tu ẹyin silẹ lati inu ovaries. Eyi maa n ṣẹlẹ lẹ́ẹ̀kan ni gbogbo osù, ní àárín cycle. Ní akoko yii, aye ti pọ fun oyun. O le ni irora díẹ̀ lẹ́gbẹ̀ẹ́, omi inu ara le pọ si, tabi ki o ni ifẹ si ibalopo diẹ sii. Tọju ara rẹ daradara ní ọjọ́ wọ̀nyẹn.";
+  }
+
+  // Demo Answer 3: Health tip in Pidgin (exact wording)
+  if (lower.includes("health tip") || (lower.includes("pidgin") && (lower.includes("health") || lower.includes("tip")))) {
+    return "No matter how busy you dey, make you drink water well, rest small, and try balance your food. Your body dey talk to you, so hear am. If anything feel strange or heavy, abeg check with health worker.";
+  }
+
+  // Otherwise call N-ATLaS (Hugging Face Inference)
+  const prompt = `
+You are AwarriCare, an African women's health assistant.
+Use simple, safe, friendly language. Never give medical diagnosis.
+Support English, Yoruba, Hausa, Igbo, Pidgin.
+User: ${userText}
+Respond in the same language the user used. Keep replies under 120 words.
+`.trim();
+
+  try {
+    const res = await fetch(`https://api-inference.huggingface.co/models/${HF_MODEL}`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${HF_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        inputs: prompt,
+        parameters: { max_new_tokens: 150, temperature: 0.4 }
+      })
+    });
+
+    const data = await res.json();
+
+    if (Array.isArray(data)) return (data[0]?.generated_text || "").trim() || "I couldn't generate a response.";
+    if (data.generated_text) return data.generated_text.trim();
+    if (typeof data === "string") return data;
+    return "Network busy. Try again.";
+  } catch (err) {
+    console.error("N-ATLaS error:", err);
+    return "Network error. Try again later.";
+  }
+}
+
+/* ---------- Small language detector (best-effort) ---------- */
+function detectLanguage(text) {
+  if (!text) return "English";
+  const lower = text.toLowerCase();
+  if (lower.includes("ẹ") || lower.includes("ọ") || lower.includes("ní") || lower.includes("ẹyin") || lower.includes("ọjọ́")) return "Yoruba";
+  if (lower.includes("dey") || lower.includes("abeg") || lower.includes("wey") || lower.includes("howfar")) return "Pidgin";
+  if (lower.includes("akwai") || lower.includes("ne") || lower.includes("ina") || lower.includes("lafiya")) return "Hausa";
+  if (lower.includes("nwa") || lower.includes("ime") || lower.includes("naị") || lower.includes("ụbọchị")) return "Igbo";
+  return "English";
+}
+
+/* ---------- DOM & UI wiring ---------- */
+document.addEventListener("DOMContentLoaded", () => {
+  // Elements (main)
+  const screens = document.querySelectorAll(".screen");
+  const navButtons = document.querySelectorAll(".nav-btn");
+  const languageToggle = document.getElementById("languageToggle");
+  const languageMenu = document.getElementById("languageMenu");
+  const yearSpan = document.getElementById("year");
+
+  // Cycle / trackers
+  const cycleInput = document.getElementById("cycleInput");
+  const calcNextPeriodBtn = document.getElementById("calcNextPeriodBtn");
+  const saveCycleBtn = document.getElementById("saveCycleBtn");
+  const nextPeriodDateEl = document.getElementById("next-period-date");
+  const nextPeriodSummary = document.getElementById("next-period");
+
+  const periodForm = document.getElementById("periodForm");
+  const periodStart = document.getElementById("periodStart");
+  const flowSelect = document.getElementById("flowSelect");
+  const cycleInfo = document.getElementById("cycle-info");
+
+  const cycleLengthOv = document.getElementById("cycleLengthOv");
+  const calcOvulationBtn = document.getElementById("calcOvulationBtn");
+  const useSavedCycleBtn = document.getElementById("useSavedCycleBtn");
+  const ovulationDateEl = document.getElementById("ovulation-date");
+
+  const lmp = document.getElementById("lmp");
+  const calcDueBtn = document.getElementById("calcDueBtn");
+  const dueDateEl = document.getElementById("due-date");
+
+  // Forum
+  const toggleNewDiscussion = document.getElementById("toggleNewDiscussion");
+  const newDiscussionForm = document.getElementById("newDiscussionForm");
+  const discussionInput = document.getElementById("discussionInput");
+  const postDiscussion = document.getElementById("postDiscussion");
+  const cancelDiscussion = document.getElementById("cancelDiscussion");
+  const forumList = document.getElementById("forumList");
+
+  const resourcesList = document.getElementById("resources-list");
+
+  // AI Insight
+  const aiInput = document.getElementById("aiInput");
+  const aiBtn = document.getElementById("getAIInsightBtn");
+  const aiBox = document.getElementById("aiInsightBox");
+  const clearAIBtn = document.getElementById("clearAIBtn");
+
+  // Chat elements
+  const chatIcon = document.getElementById("chatIcon");
+  const chatBox = document.getElementById("chatBox");
+  const closeChat = document.getElementById("closeChat");
+  const chatBody = document.getElementById("chatBody");
+  const chatInput = document.getElementById("chatInput");
+  const chatSend = document.getElementById("chatSend");
+
+  // footer year
+  if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+
+  /* ---------- NAV ---------- */
+  function showScreen(targetId) {
+    if (!targetId) return;
+    screens.forEach(s => s.id === targetId ? s.classList.add("active") : s.classList.remove("active"));
+    navButtons.forEach(btn => btn.dataset.target === targetId ? btn.classList.add("active") : btn.classList.remove("active"));
+    if (targetId === "educational-resources") loadResources();
+    localStorage.setItem("awarricare_last_screen", targetId);
+  }
+
+  navButtons.forEach(btn => {
+    btn.addEventListener("click", () => showScreen(btn.dataset.target));
+  });
+
+  const lastActive = localStorage.getItem("awarricare_last_screen");
+  if (lastActive) showScreen(lastActive);
+
+  /* ---------- LANGUAGE MENU ---------- */
+  if (languageToggle && languageMenu) {
+    languageToggle.addEventListener("click", () => {
+      const expanded = languageToggle.getAttribute("aria-expanded") === "true";
+      languageToggle.setAttribute("aria-expanded", (!expanded).toString());
+      languageMenu.hidden = !languageMenu.hidden;
+    });
+
+    languageMenu.addEventListener("click", (e) => {
+      if (e.target && e.target.matches("li[data-lang]")) {
+        const lang = e.target.dataset.lang;
+        alert(`Language switched (demo): ${lang}`);
+        languageMenu.hidden = true;
+      }
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!languageMenu.contains(e.target) && e.target !== languageToggle) {
+        languageMenu.hidden = true;
+        languageToggle.setAttribute('aria-expanded','false');
+      }
+    });
+  }
+
+  /* ---------- UTIL: date, update UI ---------- */
+  function formatDate(d) { return new Date(d).toLocaleDateString(undefined, {year:"numeric", month:"long", day:"numeric"}); }
+  function calculateNextPeriodFrom(cycleDays, fromDate = new Date()) { const d = new Date(fromDate); d.setDate(d.getDate() + Number(cycleDays)); return d; }
+  function updateNextPeriodUI(date) { if (nextPeriodDateEl) nextPeriodDateEl.textContent = formatDate(date); if (nextPeriodSummary) nextPeriodSummary.textContent = formatDate(date); }
+
+  /* ---------- CYCLE length load/save ---------- */
+  const savedCycleLength = localStorage.getItem("awarri_cycle_length");
+  if (savedCycleLength) {
+    if (cycleInput) cycleInput.value = savedCycleLength;
+    if (cycleLengthOv) cycleLengthOv.value = savedCycleLength;
+  }
+
+  if (calcNextPeriodBtn) calcNextPeriodBtn.addEventListener("click", () => {
+    const val = Number(cycleInput.value);
+    if (!val || val < 18 || val > 45) { alert("Enter a cycle length between 18 and 45 days."); return; }
+    updateNextPeriodUI(calculateNextPeriodFrom(val));
+  });
+
+  if (saveCycleBtn) saveCycleBtn.addEventListener("click", () => {
+    const val = Number(cycleInput.value);
+    if (!val || val < 18 || val > 45) { alert("Enter a cycle length between 18 and 45 days to save."); return; }
+    localStorage.setItem("awarri_cycle_length", String(val));
+    alert("Cycle length saved locally.");
+  });
+
+  /* ---------- PERIOD TRACKER ---------- */
+  if (periodForm) {
+    periodForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const start = periodStart.value;
+      const flow = flowSelect.value;
+      if (!start) { alert("Please enter the start date."); return; }
+      if (cycleInfo) cycleInfo.innerHTML = `<p><strong>Cycle Start:</strong> ${formatDate(start)}</p><p><strong>Flow:</strong> ${flow}</p>`;
+      const history = JSON.parse(localStorage.getItem("herhealth_period_history") || "[]");
+      history.unshift({startDate:start, flow, createdAt:new Date().toISOString()});
+      localStorage.setItem("herhealth_period_history", JSON.stringify(history.slice(0,50)));
+    });
+  }
+  const clearPeriodBtn = document.getElementById("clearPeriod");
+  if (clearPeriodBtn) clearPeriodBtn.addEventListener("click", () => {
+    if (periodStart) periodStart.value = ""; if (flowSelect) flowSelect.value = "Moderate"; if (cycleInfo) cycleInfo.innerHTML = "";
+  });
+
+  /* ---------- OVULATION ---------- */
+  if (calcOvulationBtn) calcOvulationBtn.addEventListener("click", () => {
+    let cycle = Number(cycleLengthOv.value) || Number(localStorage.getItem("awarri_cycle_length") || 0);
+    if (!cycle || cycle < 18 || cycle > 45) { alert("Please provide a valid cycle length."); return; }
+    const today = new Date(); const ovulation = new Date(today); ovulation.setDate(today.getDate() + (cycle - 14));
+    if (ovulationDateEl) ovulationDateEl.textContent = formatDate(ovulation);
+  });
+  if (useSavedCycleBtn) useSavedCycleBtn.addEventListener("click", () => {
+    const saved = localStorage.getItem("awarri_cycle_length"); if (saved) { cycleLengthOv.value = saved; alert("Loaded saved cycle length."); } else alert("No saved cycle length found.");
+  });
+
+  /* ---------- PREGNANCY ---------- */
+  if (calcDueBtn) calcDueBtn.addEventListener("click", () => {
+    const val = lmp.value; if (!val) { alert("Please enter your last menstrual period (LMP)."); return; }
+    const d = new Date(val); d.setDate(d.getDate() + 280); if (dueDateEl) dueDateEl.textContent = formatDate(d);
+  });
+
+  /* ---------- FORUM ---------- */
+  if (toggleNewDiscussion && newDiscussionForm) toggleNewDiscussion.addEventListener("click", () => newDiscussionForm.classList.toggle("hidden"));
+  if (cancelDiscussion) cancelDiscussion.addEventListener("click", () => { if (discussionInput) discussionInput.value = ""; if (newDiscussionForm) newDiscussionForm.classList.add("hidden"); });
+  if (postDiscussion) postDiscussion.addEventListener("click", () => {
+    const text = (discussionInput.value || "").trim(); if (!text) { alert("Please enter a topic."); return; }
+    const thread = document.createElement("div"); thread.className = "discussion-thread"; thread.innerHTML = `<h4>${escapeHtml(text)}</h4><p class="muted">Posted anonymously</p>`; if (forumList) forumList.prepend(thread);
+    discussionInput.value = ""; if (newDiscussionForm) newDiscussionForm.classList.add("hidden");
+    const saved = JSON.parse(localStorage.getItem("awarricare_forum") || "[]"); saved.unshift({ title: text, createdAt: new Date().toISOString() }); localStorage.setItem("awarricare_forum", JSON.stringify(saved.slice(0,50)));
+  });
+
+  function escapeHtml(s){ return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+
+  try {
+    const savedThreads = JSON.parse(localStorage.getItem("awarricare_forum") || "[]"); if (savedThreads.length && forumList) savedThreads.forEach(t => { const node = document.createElement("div"); node.className = "discussion-thread"; node.innerHTML = `<h4>${escapeHtml(t.title)}</h4><p class="muted">Posted earlier</p>`; forumList.appendChild(node); });
+  } catch (err) { console.warn("Failed loading forum", err); }
+
+  /* ---------- RESOURCES (lazy) ---------- */
+  async function loadResources(){
+    if (!resourcesList) return;
+    resourcesList.innerHTML = '<p class="muted">Fetching curated resources...</p>';
+    try {
+      const placeholder = [
+        {title:'Understanding Menstrual Cycles', desc:'A beginner-friendly guide to the menstrual cycle and hormonal changes.', url:'#'},
+        {title:'Managing Stress During Your Cycle', desc:'Tips for mental wellness and self-care.', url:'#'}
+      ];
+      resourcesList.innerHTML = ''; placeholder.forEach(r => { const div = document.createElement("div"); div.className = "resource-item"; div.innerHTML = `<h4>${r.title}</h4><p>${r.desc}</p><a href="${r.url}" target="_blank">Read more</a>`; resourcesList.appendChild(div); });
+    } catch (err) { resourcesList.textContent = "Failed to load resources."; console.error(err); }
+  }
+
+  /* ---------- AI Insight (typing effect) ---------- */
+  async function generateAIInsight(question) {
+    if (!aiBox) return;
+    if (!question || !question.trim()) { aiBox.textContent = "Please enter a question first."; return; }
+
+    aiBox.textContent = "Thinking…";
+
+    try {
+      const reply = await getAIResponse(question);
+
+      // typing effect
+      aiBox.textContent = "";
+      let i = 0;
+      const speed = 18;
+      function type() {
+        if (i < reply.length) {
+          aiBox.textContent += reply.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        }
+      }
+      type();
+    } catch (err) {
+      console.error(err);
+      aiBox.textContent = "Sorry — something went wrong.";
+    }
+  }
+
+  if (aiBtn) aiBtn.addEventListener("click", () => generateAIInsight(aiInput.value));
+  if (aiInput) aiInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); generateAIInsight(aiInput.value); }});
+  if (clearAIBtn) clearAIBtn.addEventListener("click", () => { aiInput.value = ""; aiBox.textContent = "AI response will appear here…"; });
+
+  /* ---------- CHATBOX ---------- */
+  let chatOpen = false;
+  if (chatIcon && chatBox) chatIcon.addEventListener("click", () => { chatOpen = !chatOpen; chatBox.hidden = !chatOpen; chatBox.setAttribute("aria-hidden", String(!chatOpen)); if (chatOpen) chatInput.focus(); });
+  if (closeChat && chatBox) closeChat.addEventListener("click", () => { chatOpen = false; chatBox.hidden = true; chatBox.setAttribute("aria-hidden","true"); });
+
+  function appendUserMessage(text) {
+    if (!chatBody) return;
+    const p = document.createElement("div"); p.className = "user-message"; p.textContent = text; chatBody.appendChild(p); chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function appendBotMessage(text) {
+    if (!chatBody) return;
+    // language label
+    const lang = detectLanguage(text);
+    const container = document.createElement("div"); container.className = "message-container";
+    if (lang) {
+      const label = document.createElement("div"); label.className = "bot-language-label"; label.textContent = lang; container.appendChild(label);
+    }
+    const p = document.createElement("div"); p.className = "bot-message"; p.textContent = text; container.appendChild(p);
+    chatBody.appendChild(container);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  async function handleChatSend() {
+    if (!chatInput) return;
+    const text = (chatInput.value || "").trim();
+    if (!text) return;
+    appendUserMessage(text);
+    chatInput.value = "";
+
+    // add temporary typing bubble
+    const typing = document.createElement("div"); typing.className = "bot-message"; typing.textContent = "Thinking…"; chatBody.appendChild(typing); chatBody.scrollTop = chatBody.scrollHeight;
+
+    try {
+      const reply = await getAIResponse(text);
+      // replace typing bubble with labeled bot message
+      typing.remove();
+      appendBotMessage(reply);
+    } catch (err) {
+      console.error(err);
+      typing.textContent = "Sorry — something went wrong.";
+    }
+  }
+
+  if (chatSend) chatSend.addEventListener("click", handleChatSend);
+  if (chatInput) chatInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); handleChatSend(); }});
+
+}); // End

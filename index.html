@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AwarriCare — Menstrual & Reproductive Health</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <img src="valentine-day-heart-3d-illustration-design.png" alt="AwarriCare logo" class="logo" />
+        <div>
+          <h1 class="app-title">AwarriCare</h1>
+          <p class="tagline">Your health, your way — local, private, and empowered</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="language">
+          <button id="languageToggle" aria-expanded="false" aria-controls="languageMenu" class="lang-btn">🌐</button>
+          <ul id="languageMenu" class="language-menu" hidden>
+            <li data-lang="en">English</li>
+            <li data-lang="yo">Yoruba</li>
+            <li data-lang="ha">Hausa</li>
+            <li data-lang="ig">Igbo</li>
+            <li data-lang="pcm">Pidgin</li>
+          </ul>
+        </div>
+
+        <nav class="main-nav" aria-label="Main navigation">
+          <button class="nav-btn active" data-target="home">Home</button>
+          <button class="nav-btn" data-target="period-tracker">Period</button>
+          <button class="nav-btn" data-target="ovulation-tracker">Ovulation</button>
+          <button class="nav-btn" data-target="pregnancy-tracker">Pregnancy</button>
+          <button class="nav-btn" data-target="community-forum">Forum</button>
+          <button class="nav-btn" data-target="educational-resources">Resources</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Home -->
+    <section id="home" class="screen active" aria-labelledby="home-heading">
+      <h2 id="home-heading">Welcome to AwarriCare</h2>
+      <p class="lead">A personalized companion for menstrual, fertility and pregnancy tracking — with local language support.</p>
+
+      <div class="home-grid">
+        <article class="card">
+          <h3>Next Period</h3>
+          <p class="large" id="next-period">Not set</p>
+        </article>
+
+        <article class="card">
+          <h3>Today's Tip</h3>
+          <p id="daily-tips">Stay hydrated and get enough rest.</p>
+        </article>
+      </div>
+
+      <div class="card cycle-input-card">
+        <label for="cycleInput">Cycle length (days)</label>
+        <input id="cycleInput" type="number" min="18" max="45" placeholder="e.g., 28" />
+        <div class="row">
+          <button id="calcNextPeriodBtn" class="btn">Calculate</button>
+          <button id="saveCycleBtn" class="btn muted">Save</button>
+        </div>
+        <p class="muted small">Saved cycle length will be used across trackers.</p>
+        <div class="next-period">
+          <h4>Estimated next period:</h4>
+          <p id="next-period-date">Not calculated</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI Insight -->
+    <section id="ai-insight" class="screen card" aria-labelledby="ai-heading">
+      <h2 id="ai-heading">AI Insight (Powered by N-ATLaS)</h2>
+      <textarea id="aiInput" placeholder="Ask about symptoms, cycle questions, or health concerns…" rows="3"></textarea>
+      <div class="row">
+        <button id="getAIInsightBtn" class="btn primary">Get AI Insight</button>
+        <button id="clearAIBtn" class="btn muted">Clear</button>
+      </div>
+      <div id="aiInsightBox" class="ai-box">AI response will appear here…</div>
+    </section>
+
+    <!-- Period Tracker -->
+    <section id="period-tracker" class="screen" aria-labelledby="period-heading">
+      <h2 id="period-heading">Period Tracker</h2>
+      <form id="periodForm" class="card" autocomplete="off">
+        <label for="periodStart">Cycle start date</label>
+        <input id="periodStart" type="date" required />
+        <label for="flowSelect">Flow intensity</label>
+        <select id="flowSelect">
+          <option value="Light">Light</option>
+          <option value="Moderate">Moderate</option>
+          <option value="Heavy">Heavy</option>
+        </select>
+        <div class="row">
+          <button type="submit" class="btn">Save</button>
+          <button type="button" id="clearPeriod" class="btn muted">Clear</button>
+        </div>
+      </form>
+      <div id="cycle-info" class="card muted"></div>
+    </section>
+
+    <!-- Ovulation -->
+    <section id="ovulation-tracker" class="screen" aria-labelledby="ovulation-heading">
+      <h2 id="ovulation-heading">Ovulation Tracker</h2>
+      <div class="card">
+        <label for="cycleLengthOv">Cycle length (days)</label>
+        <input id="cycleLengthOv" type="number" min="18" max="45" placeholder="e.g., 28" />
+        <div class="row">
+          <button id="calcOvulationBtn" class="btn">Predict Ovulation</button>
+          <button id="useSavedCycleBtn" class="btn muted">Use saved cycle</button>
+        </div>
+        <p class="result" id="ovulation-date">Not calculated</p>
+      </div>
+    </section>
+
+    <!-- Pregnancy -->
+    <section id="pregnancy-tracker" class="screen" aria-labelledby="pregnancy-heading">
+      <h2 id="pregnancy-heading">Pregnancy Tracker</h2>
+      <div class="card">
+        <label for="lmp">Last Menstrual Period (LMP)</label>
+        <input id="lmp" type="date" />
+        <div class="row">
+          <button id="calcDueBtn" class="btn">Calculate Due Date</button>
+        </div>
+        <p class="result" id="due-date">Not calculated</p>
+      </div>
+    </section>
+
+    <!-- Forum -->
+    <section id="community-forum" class="screen" aria-labelledby="forum-heading">
+      <h2 id="forum-heading">Community Forum</h2>
+      <div class="card forum-card">
+        <button id="toggleNewDiscussion" class="btn new-disc-btn">+ Start a new discussion</button>
+        <div id="newDiscussionForm" class="new-discussion hidden">
+          <textarea id="discussionInput" rows="3" placeholder="Share a topic anonymously..."></textarea>
+          <div class="row">
+            <button id="postDiscussion" class="btn">Post</button>
+            <button id="cancelDiscussion" class="btn muted">Cancel</button>
+          </div>
+        </div>
+
+        <div id="forumList" class="forum-list" aria-live="polite">
+          <!-- threads injected here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Resources -->
+    <section id="educational-resources" class="screen" aria-labelledby="resources-heading">
+      <h2 id="resources-heading">Educational Resources</h2>
+      <div id="resourcesContainer" class="card resources-card">
+        <div id="resources-list">
+          <p class="muted">Click Resources in the menu to fetch curated articles.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Chat / AI Assistant -->
+  <button id="chatIcon" class="chat-icon" aria-label="Open chat">💬</button>
+
+  <div id="chatBox" class="chat-box" hidden aria-hidden="true">
+    <header class="chat-header">
+      <h3>AwarriCare Assistant</h3>
+      <button id="closeChat" aria-label="Close chat">&times;</button>
+    </header>
+
+    <div class="chat-body" id="chatBody" role="log" aria-live="polite">
+      <div class="bot-message">Hi — I can answer questions about cycles, ovulation and more. Type in your question.</div>
+    </div>
+
+    <footer class="chat-footer">
+      <input id="chatInput" placeholder="Ask in English or a supported local language..." />
+      <button id="chatSend" class="btn">Send</button>
+    </footer>
+  </div>
+
+  <footer class="site-footer">
+    <div>&copy; <span id="year"></span> AwarriCare</div>
+    <small>Built for local communities • Privacy-first •  
+    POWERED BY N-ATLaS</small>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
