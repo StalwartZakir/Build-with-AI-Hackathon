@@ -122,7 +122,7 @@ body::before{
   content: "";
   position: fixed;
   inset: 0;
-  background-image: url("/2025 Awarri Challenge/portrait-african-american-woman-posing 1.png");
+  background-image: url("portrait-african-american-woman-posing 1.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
